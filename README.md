@@ -1,5 +1,7 @@
 # mulesoft-orders-api
 
+[![develop](https://dev.azure.com/brunosouzas/mulesoft-delivery-reference/_apis/build/status/mulesoft-orders-api?branchName=develop&label=develop)](https://github.com/brunosouzas/mulesoft-orders-api/commits/develop) [![main](https://dev.azure.com/brunosouzas/mulesoft-delivery-reference/_apis/build/status/mulesoft-orders-api?branchName=main&label=main)](https://github.com/brunosouzas/mulesoft-orders-api/releases)
+
 A small Mule 4 application used as the reference for a corporate-style delivery flow: **GitFlow**, versioning with the **maven-release-plugin**, and **Azure Pipelines** templates deploying to **CloudHub 2.0** with approvals.
 
 The API itself is deliberately simple. The interesting parts are the branch rules, the release process and the pipeline.
@@ -24,12 +26,24 @@ hotfix/x.y.z ──────────────PR───────�
 
 Branch rules are in [CONTRIBUTING.md](CONTRIBUTING.md). The pipeline is a thin [`azure-pipelines.yml`](azure-pipelines.yml) that extends the shared templates in [azure-devops-mulesoft-pipelines](https://github.com/brunosouzas/azure-devops-mulesoft-pipelines), pinned to a tag. The reasoning behind each choice is recorded as ADRs in that repository.
 
+The Azure DevOps project is private (Microsoft no longer allows new public projects in this organisation). Every run still reports back to GitHub as a check on commits and pull requests, and the badges above are public.
+
+## Environments
+
+| Environment | Health check |
+|---|---|
+| test | [/api/health](https://mulesoft-orders-api-test-47xgd0.5sc6y6-1.usa-e2.cloudhub.io/api/health) |
+| uat | [/api/health](https://mulesoft-orders-api-uat-oswi7c.5sc6y6-2.usa-e2.cloudhub.io/api/health) |
+| prod | [/api/health](https://mulesoft-orders-api-prod-aslzjy.5sc6y6-2.usa-e2.cloudhub.io/api/health) |
+
+These run on an Anypoint Platform trial and may be stopped when the trial ends.
+
 ## Configuration
 
 | File | Purpose |
 |---|---|
 | `src/main/resources/config/config-<env>.yaml` | Application properties per environment (selected by `mule.env`) |
-| `deployment/<env>.yaml` | CloudHub 2.0 sizing per environment: application name, target, runtime, replicas, vCores |
+| `deployment/<env>.yaml` | CloudHub 2.0 sizing per environment (application name, target, runtime, replicas, vCores) and the `healthUrl` used by the post-deployment smoke test |
 
 Secrets never live in the repository: the pipeline receives the Anypoint Connected App credentials from an Azure DevOps variable group and writes `settings.xml` at runtime.
 
