@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+
+	<munit:config name="orders-api-test-suite.xml" />
+
+	<munit:test name="test-health" description="Health returns UP and the environment">
+		<munit:execution>
+			<munit:set-event doc:name="Input">
+				<munit:payload value="#[null]" />
+			</munit:set-event>
+			<flow-ref doc:name="Run" name="get-health" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Status" expression="#[payload.status]" is="#[MunitTools::equalTo('UP')]" />
+			<munit-tools:assert-that doc:name="Env" expression="#[payload.environment]" is="#[MunitTools::equalTo('test')]" />
+		</munit:validation>
+	</munit:test>
+
+	<munit:test name="test-get-order-found" description="Known order is returned">
+		<munit:execution>
+			<munit:set-event doc:name="Input">
+				<munit:attributes value="#[{ uriParams: { orderId: 'ORD-1001' } }]" />
+			</munit:set-event>
+			<flow-ref doc:name="Run" name="get-order" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Total" expression="#[payload.totalPrice]" is="#[MunitTools::equalTo(120)]" />
+		</munit:validation>
+	</munit:test>
+
+	<munit:test name="test-get-order-not-found" description="Unknown order is 404">
+		<munit:execution>
+			<munit:set-event doc:name="Input">
+				<munit:attributes value="#[{ uriParams: { orderId: 'ORD-0000' } }]" />
+			</munit:set-event>
+			<flow-ref doc:name="Run" name="get-order" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Status" expression="#[vars.httpStatus as Number]" is="#[MunitTools::equalTo(404)]" />
+		</munit:validation>
+	</munit:test>
+
+	<munit:test name="test-create-order" description="Valid order is accepted">
+		<munit:execution>
+			<munit:set-event doc:name="Input">
+				<munit:payload value="#[output application/json --- {orderId: 'ORD-9', price: 50, quantity: 2}]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Run" name="create-order" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Total" expression="#[payload.totalPrice]" is="#[MunitTools::equalTo(100)]" />
+			<munit-tools:assert-that doc:name="Status" expression="#[vars.httpStatus as Number]" is="#[MunitTools::equalTo(201)]" />
+		</munit:validation>
+	</munit:test>
+
+	<munit:test name="test-create-order-missing-id" description="Missing orderId is 400">
+		<munit:execution>
+			<munit:set-event doc:name="Input">
+				<munit:payload value="#[output application/json --- {price: 50, quantity: 2}]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Run" name="create-order" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Status" expression="#[vars.httpStatus as Number]" is="#[MunitTools::equalTo(400)]" />
+		</munit:validation>
+	</munit:test>
+
+	<munit:test name="test-create-order-bad-quantity" description="Zero quantity is 400">
+		<munit:execution>
+			<munit:set-event doc:name="Input">
+				<munit:payload value="#[output application/json --- {orderId: 'ORD-9', price: 50, quantity: 0}]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Run" name="create-order" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Status" expression="#[vars.httpStatus as Number]" is="#[MunitTools::equalTo(400)]" />
+		</munit:validation>
+	</munit:test>
+</mule>

@@ -1,0 +1,6 @@
+# CloudHub 2.0 settings for the uat environment. Read by the pipeline (templates/jobs/deploy.yml).
+applicationName: mulesoft-orders-api-uat
+target: Cloudhub-US-East-2
+runtimeVersion: 4.9.0
+replicas: 1
+vCores: 0.1

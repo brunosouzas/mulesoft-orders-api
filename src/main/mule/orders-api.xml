@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+		http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+	<!-- Health check: shows which environment answered. Used to verify each deployment. -->
+	<flow name="get-health">
+		<http:listener doc:name="Listener" config-ref="http-listener-config" path="/api/health" allowedMethods="GET">
+			<http:response statusCode="#[vars.httpStatus default 200]" />
+		</http:listener>
+		<ee:transform doc:name="Health">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	status: "UP",
+	application: p('app.name'),
+	environment: p('app.environment')
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+
+	<flow name="get-order">
+		<http:listener doc:name="Listener" config-ref="http-listener-config" path="/api/orders/{orderId}" allowedMethods="GET">
+			<http:response statusCode="#[vars.httpStatus default 200]" />
+		</http:listener>
+		<flow-ref doc:name="Find order" name="find-order" />
+	</flow>
+
+	<flow name="create-order">
+		<http:listener doc:name="Listener" config-ref="http-listener-config" path="/api/orders" allowedMethods="POST">
+			<http:response statusCode="#[vars.httpStatus default 200]" />
+		</http:listener>
+		<flow-ref doc:name="Validate" name="validate-order" />
+		<ee:transform doc:name="Accept order">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	orderId: payload.orderId,
+	totalPrice: payload.price * payload.quantity,
+	status: "ACCEPTED"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable doc:name="201" variableName="httpStatus" value="201" />
+	</flow>
+
+	<sub-flow name="validate-order">
+		<choice doc:name="Valid?">
+			<when expression="#[isEmpty(payload.orderId)]">
+				<raise-error type="APP:BAD_REQUEST" description="orderId is required" />
+			</when>
+			<when expression="#[(payload.quantity default 0) &lt;= 0]">
+				<raise-error type="APP:BAD_REQUEST" description="quantity must be greater than zero" />
+			</when>
+		</choice>
+	</sub-flow>
+
+	<!-- Synthetic data; the point of this repository is the delivery pipeline, not the business logic. -->
+	<sub-flow name="find-order">
+		<ee:transform doc:name="Lookup">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var orders = {
+	"ORD-1001": { orderId: "ORD-1001", status: "PENDING", totalPrice: 120 },
+	"ORD-1002": { orderId: "ORD-1002", status: "SHIPPED", totalPrice: 75.5 }
+}
+---
+orders[attributes.uriParams.orderId default ""]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<choice doc:name="Found?">
+			<when expression="#[payload == null]">
+				<raise-error type="APP:NOT_FOUND" description="Order not found" />
+			</when>
+		</choice>
+	</sub-flow>
+</mule>

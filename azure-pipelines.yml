@@ -1,0 +1,26 @@
+# The whole delivery flow lives in the shared templates repository, pinned to a tag.
+# Upgrading the pipeline for this application = changing `ref` below.
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  branches:
+    include: [develop, main, feature/*, release/*, hotfix/*]
+  paths:
+    exclude: ['*.md', docs/*]
+
+pr:
+  branches:
+    include: [develop, main]
+
+resources:
+  repositories:
+  - repository: templates
+    type: github
+    endpoint: github-brunosouzas
+    name: brunosouzas/azure-devops-mulesoft-pipelines
+    ref: refs/tags/v1.0.0
+
+extends:
+  template: templates/stages/gitflow.yml@templates
+  parameters:
+    nextVersionBump: minor

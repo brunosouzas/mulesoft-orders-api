@@ -1,0 +1,5 @@
+# Every change needs a review from the integration team.
+*                     @brunosouzas
+# Delivery configuration changes are reviewed with extra care.
+/azure-pipelines.yml  @brunosouzas
+/deployment/          @brunosouzas

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- groupId must be the Anypoint organization (business group) ID to publish to Exchange. -->
+	<groupId>c17ce335-be76-4fd0-87e2-130837d2c65a</groupId>
+	<artifactId>mulesoft-orders-api</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>mule-application</packaging>
+
+	<name>mulesoft-orders-api</name>
+	<description>Reference Mule application for GitFlow, Maven release and Azure Pipelines on CloudHub 2.0.</description>
+	<url>https://github.com/brunosouzas/mulesoft-orders-api</url>
+
+	<licenses>
+		<license>
+			<name>MIT</name>
+			<url>https://opensource.org/licenses/MIT</url>
+		</license>
+	</licenses>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<app.runtime>4.9.17</app.runtime>
+		<mule.maven.plugin.version>4.9.1</mule.maven.plugin.version>
+		<munit.version>3.7.1</munit.version>
+		<mule.http.connector.version>1.11.3</mule.http.connector.version>
+		<maven.release.plugin.version>3.3.1</maven.release.plugin.version>
+		<!-- Deployment values are passed by the pipeline from deployment/<env>.yaml -->
+		<deploy.environment>test</deploy.environment>
+		<deploy.applicationName>${project.artifactId}-${deploy.environment}</deploy.applicationName>
+		<deploy.target>Cloudhub-US-East-2</deploy.target>
+		<deploy.runtimeVersion>4.9.0</deploy.runtimeVersion>
+		<deploy.releaseChannel>LTS</deploy.releaseChannel>
+		<deploy.replicas>1</deploy.replicas>
+		<deploy.vCores>0.1</deploy.vCores>
+		<deploy.clientId />
+		<deploy.clientSecret />
+	</properties>
+
+	<scm>
+		<connection>scm:git:https://github.com/brunosouzas/mulesoft-orders-api.git</connection>
+		<developerConnection>scm:git:https://github.com/brunosouzas/mulesoft-orders-api.git</developerConnection>
+		<url>https://github.com/brunosouzas/mulesoft-orders-api</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<distributionManagement>
+		<repository>
+			<id>anypoint-exchange-v3</id>
+			<name>Anypoint Exchange</name>
+			<url>https://maven.anypoint.mulesoft.com/api/v3/organizations/${project.groupId}/maven</url>
+			<layout>default</layout>
+		</repository>
+		<snapshotRepository>
+			<id>anypoint-exchange-v3</id>
+			<name>Anypoint Exchange</name>
+			<url>https://maven.anypoint.mulesoft.com/api/v3/organizations/${project.groupId}/maven</url>
+			<layout>default</layout>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.4.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.mule.tools.maven</groupId>
+				<artifactId>mule-maven-plugin</artifactId>
+				<version>${mule.maven.plugin.version}</version>
+				<extensions>true</extensions>
+				<configuration>
+					<classifier>mule-application</classifier>
+					<cloudhub2Deployment>
+						<uri>https://anypoint.mulesoft.com</uri>
+						<provider>MC</provider>
+						<environment>${deploy.environment}</environment>
+						<target>${deploy.target}</target>
+						<muleVersion>${deploy.runtimeVersion}</muleVersion>
+						<releaseChannel>${deploy.releaseChannel}</releaseChannel>
+						<javaVersion>17</javaVersion>
+						<applicationName>${deploy.applicationName}</applicationName>
+						<replicas>${deploy.replicas}</replicas>
+						<vCores>${deploy.vCores}</vCores>
+						<connectedAppClientId>${deploy.clientId}</connectedAppClientId>
+						<connectedAppClientSecret>${deploy.clientSecret}</connectedAppClientSecret>
+						<connectedAppGrantType>client_credentials</connectedAppGrantType>
+						<properties>
+							<mule.env>${deploy.environment}</mule.env>
+						</properties>
+					</cloudhub2Deployment>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>${maven.release.plugin.version}</version>
+				<configuration>
+					<!-- [skip ci] stops the release commits from triggering the pipeline again. -->
+					<scmCommentPrefix>[skip ci] [maven-release-plugin] </scmCommentPrefix>
+					<tagNameFormat>v@{project.version}</tagNameFormat>
+					<goals>deploy</goals>
+					<pushChanges>true</pushChanges>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.mulesoft.munit.tools</groupId>
+				<artifactId>munit-maven-plugin</artifactId>
+				<version>${munit.version}</version>
+				<executions>
+					<execution>
+						<id>test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+							<goal>coverage-report</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<runtimeVersion>${app.runtime}</runtimeVersion>
+					<runtimeProduct>MULE_EE</runtimeProduct>
+					<systemPropertyVariables>
+						<mule.env>test</mule.env>
+					</systemPropertyVariables>
+					<dynamicPorts>
+						<dynamicPort>http.port</dynamicPort>
+					</dynamicPorts>
+					<coverage>
+						<runCoverage>true</runCoverage>
+						<failBuild>true</failBuild>
+						<requiredApplicationCoverage>80</requiredApplicationCoverage>
+						<formats>
+							<format>console</format>
+						</formats>
+					</coverage>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.mule.connectors</groupId>
+			<artifactId>mule-http-connector</artifactId>
+			<version>${mule.http.connector.version}</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.munit</groupId>
+			<artifactId>munit-runner</artifactId>
+			<version>${munit.version}</version>
+			<classifier>mule-plugin</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.munit</groupId>
+			<artifactId>munit-tools</artifactId>
+			<version>${munit.version}</version>
+			<classifier>mule-plugin</classifier>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>anypoint-exchange-v3</id>
+			<name>Anypoint Exchange</name>
+			<url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
+			<layout>default</layout>
+		</repository>
+		<repository>
+			<id>mulesoft-releases</id>
+			<name>MuleSoft Releases Repository</name>
+			<url>https://repository.mulesoft.org/releases/</url>
+			<layout>default</layout>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>mulesoft-releases</id>
+			<name>MuleSoft Releases Repository</name>
+			<url>https://repository.mulesoft.org/releases/</url>
+			<layout>default</layout>
+		</pluginRepository>
+	</pluginRepositories>
+</project>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+		http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+	<configuration-properties doc:name="Common" file="config/common.yaml" />
+	<configuration-properties doc:name="Environment" file="config/config-${mule.env}.yaml" />
+
+	<http:listener-config name="http-listener-config" doc:name="HTTP listener">
+		<http:listener-connection host="${http.host}" port="${http.port}" />
+	</http:listener-config>
+
+	<configuration doc:name="Configuration" defaultErrorHandler-ref="global-error-handler" />
+
+	<error-handler name="global-error-handler">
+		<on-error-continue type="APP:BAD_REQUEST" logException="false">
+			<set-variable variableName="httpStatus" value="400" />
+			<ee:transform doc:name="Error body">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{ error: error.description }]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-continue>
+		<on-error-continue type="APP:NOT_FOUND" logException="false">
+			<set-variable variableName="httpStatus" value="404" />
+			<ee:transform doc:name="Error body">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{ error: error.description }]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-continue>
+	</error-handler>
+</mule>
