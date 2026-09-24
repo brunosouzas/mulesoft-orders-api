@@ -16,7 +16,7 @@ resources:
   repositories:
   - repository: templates
     type: github
-    endpoint: github-brunosouzas
+    endpoint: github.com_brunosouzas
     name: brunosouzas/azure-devops-mulesoft-pipelines
     ref: refs/tags/v1.0.0
 
