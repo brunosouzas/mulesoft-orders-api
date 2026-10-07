@@ -4,7 +4,7 @@
 
 Use the human-approved task and preserve unrelated work. Read applicable nested instructions before changing their scope; report conflicting contracts. Work in the approved task checkout. Do not modify the active Obsidian checkout. Ordinary workers do not recruit or delegate; only an explicitly authorized Orchestrator coordinates an approved team, subject to the project-specific contract.
 
-Role prompts do not establish effective sandbox permissions. Reviewers use read-only execution; checks that write belong to the authorized executor or Validator. Keep secrets and sensitive production data out of Git and AI evidence; use synthetic or redacted fixtures.
+Role prompts do not establish effective sandbox permissions. Reviewers use read-only execution; checks that write belong to the authorized executor (Developer or Writer). Keep secrets and sensitive production data out of Git and AI evidence; use synthetic or redacted fixtures.
 
 ## Validation and delivery
 
