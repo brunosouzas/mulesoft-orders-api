@@ -23,3 +23,15 @@ Project-specific operation/release sources (paths relative to repository root):
 ## Integration and release boundary
 
 This instruction-only task targets develop, following the existing integration/publishing workflow. Do not merge it directly into the main release line or change branch defaults. Preserve the repository's own promotion process. Push, PR validation or integration merges can invoke platform pipelines; state the actual trigger consequences before delivery. Approval for context files is not authorization to publish an Exchange asset or deploy an application.
+
+## Documentation impact
+
+Every agent that changes this project, with or without a Maestri team and whatever skill it loaded, ends its final report with three lines:
+
+```
+O que mudou: <behaviour or content changed, in plain words>
+Documentação afetada: <repo docs, vault notes, ADR, Confluence pages, or "nenhuma, porque…">
+Proposta: <the text, or what the writer needs to know to write it>
+```
+
+When the work runs under an OpenSpec change, these lines answer its `## Documentação` section. Proposing vault or Confluence text is allowed; writing there needs its own authorization.
