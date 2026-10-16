@@ -16,7 +16,7 @@ resources:
     type: github
     endpoint: github.com_brunosouzas
     name: brunosouzas/azure-devops-mulesoft-pipelines
-    ref: refs/tags/v1.0.1
+    ref: refs/tags/v1.1.0
 
 extends:
   template: templates/stages/gitflow.yml@templates
