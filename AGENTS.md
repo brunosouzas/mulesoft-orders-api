@@ -15,7 +15,7 @@ Article: `50-writing/mulesoft-delivery-azure-devops/`
 - Build: `mvn -B clean package -DskipMunitTests`
 - Test: `mvn clean test` (MUnit; needs the MuleSoft Enterprise repository credentials in ~/.m2/settings.xml, so it runs locally, not in the public pipeline)
 - Run locally: `mvn clean package`, then deploy the jar to a local Mule 4.9 runtime and call GET /api/health
-- Deliver and verify: `a merge into develop runs the Azure Pipelines GitFlow template (azure-devops-mulesoft-pipelines, pinned tag): build, publish x.y.z-SNAPSHOT to Exchange, deploy to test; a release/x.y.z pull request into main runs the Maven release, deploys to uat and, after Bruno approves the environment, to prod; verify GET /api/health in each environment reached answers with that environment's name (URLs in README.md)`
+- Deliver and verify: `a merge into develop runs the Azure Pipelines GitFlow template (azure-devops-mulesoft-pipelines, pinned tag): build, publish x.y.z-SNAPSHOT to Exchange, deploy to test; a release/x.y.z pull request into main runs the Maven release, deploys to uat and, after Bruno approves the environment, to prod; verify GET /api/health in each environment reached answers with that environment's name (URLs in README.md) (today the Anypoint trial has ended and the CloudHub environments return 404, and the pipeline fails on AB#72, so a merge delivers nothing; verify that the links and paths the article cites still work)`
 
 ## Technology declarations
 
