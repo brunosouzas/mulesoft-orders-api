@@ -4,6 +4,19 @@
 
 A small Mule 4 application used as the reference for a corporate-style delivery flow: **GitFlow**, versioning with the **maven-release-plugin**, and **Azure Pipelines** templates deploying to **CloudHub 2.0** with approvals.
 
+## Technology
+
+Stack: Mule 4, MUnit, Maven, Azure Pipelines, CloudHub 2.0
+Delivery: C environments
+Integration branch: `develop`
+Data: none
+Article: `50-writing/mulesoft-delivery-azure-devops/`
+
+- Build: `mvn -B clean package -DskipMunitTests`
+- Test: `mvn clean test` (MUnit; needs the MuleSoft Enterprise repository credentials in ~/.m2/settings.xml, so it runs locally, not in the public pipeline)
+- Run locally: `mvn clean package`, then deploy the jar to a local Mule 4.9 runtime and call GET /api/health
+- Deliver and verify: `a merge into develop runs the Azure Pipelines GitFlow template (azure-devops-mulesoft-pipelines, pinned tag): build, publish x.y.z-SNAPSHOT to Exchange, deploy to test; a release/x.y.z pull request into main runs the Maven release, deploys to uat and, after Bruno approves the environment, to prod; verify GET /api/health in each environment reached answers with that environment's name (URLs in README.md) (today the Anypoint trial has ended and the CloudHub environments return 404, and the pipeline fails on AB#72, so a merge delivers nothing; verify that the links and paths the article cites still work)`
+
 ## Technology declarations
 
 - `app.runtime = 4.9.17` — [pom.xml](pom.xml).
@@ -28,3 +41,8 @@ GitHub default branch inspected on 2026-10-06: `main`. This context is prepared 
 ## Project rules
 
 Before planning, reviewing or changing this project, read [the applicable project rules](rules/README.md).
+
+- Article repository: this repository was made for a published article and keeps what the article published (its code, branches and pipeline). A change here changes the article, so every merge is Bruno's (level 2), also under a delegation.
+- Board area: `mulesoft` (Azure Boards, project `brunosouzas`).
+- OpenSpec: no: every change takes the small path.
+- Branches follow GitFlow as published (see CONTRIBUTING.md): changes go to `develop`; `main` only through a `release/` or `hotfix/` pull request, because a merge into `main` runs the Maven release.
