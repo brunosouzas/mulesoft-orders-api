@@ -1,8 +1,9 @@
-# CloudHub 2.0 settings for the uat environment. Read by the pipeline (templates/jobs/deploy.yml).
-applicationName: mulesoft-orders-api-uat
+# CloudHub 2.0 settings for the uat environment, read by the delivery workflow (mulesoft-deploy.yml of
+# github-reusable-workflows). The gh- prefix marks the applications this public GitHub Actions delivery owns.
+applicationName: gh-mulesoft-orders-api-uat
 target: Cloudhub-US-East-2
 runtimeVersion: 4.9.0
 replicas: 1
 vCores: 0.1
-# Post-deployment smoke test (public endpoint from Runtime Manager).
-healthUrl: https://mulesoft-orders-api-uat-oswi7c.5sc6y6-2.usa-e2.cloudhub.io/api/health
+# The check after the deploy: GET <the application's public URL><healthPath> answers 200.
+healthPath: /api/health
